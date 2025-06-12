@@ -17,7 +17,7 @@ class APIKeyValidator {
     private let secretPhrase = "YourVerySecretLongAndRandomPhraseHereForLPhotoApp!" // <<--- 【重要】请替换成您自己的长且随机的字符串
 
     // Keychain 服务标识符
-    private let keychainService = "com.yourcompany.LPhoto.apiKeyBinding" // 请替换成您自己的Bundle Identifier或独特的服务名
+    private let keychainService = "com.sunfan.LPhoto.apiKeyBinding" // 请替换成您自己的Bundle Identifier或独特的服务名
     private let keychainAccount = "apiKeyBoundIDFV"
 
     // UserDefaults 键前缀
@@ -419,10 +419,9 @@ class APIKeyValidator {
     private func fetchNetworkTime() async throws -> Date {
         // 国内可用的时间服务器列表
         let timeServers = [
-            "https://ntp.aliyun.com",
-            "https://ntp.tencent.com",
-            "https://ntp.baidu.com",
-            "http://www.beijing-time.org"
+            "https://www.baidu.com",
+            "https://www.aliyun.com",
+            "https://www.qq.com",
         ]
         
         // 配置请求超时
