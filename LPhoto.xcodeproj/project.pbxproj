@@ -6,7 +6,24 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3C1495FF2DF9292E002342A7 /* APIKeyValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1495FE2DF9292E002342A7 /* APIKeyValidator.swift */; };
+		3C7DF1AC2DF8AAEE007FB10B /* ShortcutsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7DF1AB2DF8AAEE007FB10B /* ShortcutsProvider.swift */; };
+		3CB7B7342DF92F6800FD39C6 /* VideoConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CCDC71F2DF8754D00E7A6C0 /* VideoConverter.swift */; };
+		3CB905262DF92D2A007D8813 /* LPhotoShortcuts.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 3CB9051D2DF92D2A007D8813 /* LPhotoShortcuts.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3CB9052E2DF92DCB007D8813 /* APIKeyValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1495FE2DF9292E002342A7 /* APIKeyValidator.swift */; };
+		3CBA140E2DF8B5E400A741B8 /* ImageConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBA140D2DF8B5E400A741B8 /* ImageConverter.swift */; };
+		3CCDC71E2DF8754D00E7A6C0 /* VideoConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CCDC71F2DF8754D00E7A6C0 /* VideoConverter.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
+		3CB905242DF92D2A007D8813 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3CCDC6E42DF867ED00E7A6C0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3CB9051C2DF92D2A007D8813;
+			remoteInfo = LPhotoShortcuts;
+		};
 		3CCDC6FA2DF867EE00E7A6C0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3CCDC6E42DF867ED00E7A6C0 /* Project object */;
@@ -23,15 +40,63 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		3CB905272DF92D2A007D8813 /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+				3CB905262DF92D2A007D8813 /* LPhotoShortcuts.appex in Embed ExtensionKit Extensions */,
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		3C1495FE2DF9292E002342A7 /* APIKeyValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyValidator.swift; sourceTree = "<group>"; };
+		3C7DF1AA2DF8A9EE007FB10B /* ShortcutsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShortcutsProvider.swift; path = LPhotoShortcuts/ShortcutsProvider.swift; sourceTree = "<group>"; };
+		3C7DF1AB2DF8AAEE007FB10B /* ShortcutsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShortcutsProvider.swift; path = LPhotoShortcuts/ShortcutsProvider.swift; sourceTree = "<group>"; };
+		3CB9051D2DF92D2A007D8813 /* LPhotoShortcuts.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = LPhotoShortcuts.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3CBA140D2DF8B5E400A741B8 /* ImageConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImageConverter.swift; path = Shared/ImageConverter.swift; sourceTree = "<group>"; };
 		3CCDC6EC2DF867ED00E7A6C0 /* LPhoto.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LPhoto.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CCDC6F92DF867EE00E7A6C0 /* LPhotoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LPhotoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CCDC7032DF867EE00E7A6C0 /* LPhotoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LPhotoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3CCDC71F2DF8754D00E7A6C0 /* VideoConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConverter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3CB9052B2DF92D2A007D8813 /* Exceptions for "LPhotoShortcuts" folder in "LPhotoShortcuts" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3CB9051C2DF92D2A007D8813 /* LPhotoShortcuts */;
+		};
+		3CCDC71D2DF8754D00E7A6C0 /* Exceptions for "LPhoto" folder in "LPhoto" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3CCDC6EB2DF867ED00E7A6C0 /* LPhoto */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		3CB9051E2DF92D2A007D8813 /* LPhotoShortcuts */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3CB9052B2DF92D2A007D8813 /* Exceptions for "LPhotoShortcuts" folder in "LPhotoShortcuts" target */,
+			);
+			path = LPhotoShortcuts;
+			sourceTree = "<group>";
+		};
 		3CCDC6EE2DF867ED00E7A6C0 /* LPhoto */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3CCDC71D2DF8754D00E7A6C0 /* Exceptions for "LPhoto" folder in "LPhoto" target */,
+			);
 			path = LPhoto;
 			sourceTree = "<group>";
 		};
@@ -48,6 +113,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3CB9051A2DF92D2A007D8813 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3CCDC6E92DF867ED00E7A6C0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -72,13 +144,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3C7DF1A92DF8A9EE007FB10B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3C7DF1AA2DF8A9EE007FB10B /* ShortcutsProvider.swift */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		3CCDC6E32DF867ED00E7A6C0 = {
 			isa = PBXGroup;
 			children = (
+				3CBA140D2DF8B5E400A741B8 /* ImageConverter.swift */,
+				3C7DF1AB2DF8AAEE007FB10B /* ShortcutsProvider.swift */,
 				3CCDC6EE2DF867ED00E7A6C0 /* LPhoto */,
 				3CCDC6FC2DF867EE00E7A6C0 /* LPhotoTests */,
 				3CCDC7062DF867EE00E7A6C0 /* LPhotoUITests */,
+				3CB9051E2DF92D2A007D8813 /* LPhotoShortcuts */,
 				3CCDC6ED2DF867ED00E7A6C0 /* Products */,
+				3CCDC7202DF8754D00E7A6C0 /* Shared */,
+				3C7DF1A92DF8A9EE007FB10B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -88,13 +173,45 @@
 				3CCDC6EC2DF867ED00E7A6C0 /* LPhoto.app */,
 				3CCDC6F92DF867EE00E7A6C0 /* LPhotoTests.xctest */,
 				3CCDC7032DF867EE00E7A6C0 /* LPhotoUITests.xctest */,
+				3CB9051D2DF92D2A007D8813 /* LPhotoShortcuts.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3CCDC7202DF8754D00E7A6C0 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				3C1495FE2DF9292E002342A7 /* APIKeyValidator.swift */,
+				3CCDC71F2DF8754D00E7A6C0 /* VideoConverter.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3CB9051C2DF92D2A007D8813 /* LPhotoShortcuts */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3CB9052A2DF92D2A007D8813 /* Build configuration list for PBXNativeTarget "LPhotoShortcuts" */;
+			buildPhases = (
+				3CB905192DF92D2A007D8813 /* Sources */,
+				3CB9051A2DF92D2A007D8813 /* Frameworks */,
+				3CB9051B2DF92D2A007D8813 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3CB9051E2DF92D2A007D8813 /* LPhotoShortcuts */,
+			);
+			name = LPhotoShortcuts;
+			packageProductDependencies = (
+			);
+			productName = LPhotoShortcuts;
+			productReference = 3CB9051D2DF92D2A007D8813 /* LPhotoShortcuts.appex */;
+			productType = "com.apple.product-type.extensionkit-extension";
+		};
 		3CCDC6EB2DF867ED00E7A6C0 /* LPhoto */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3CCDC70D2DF867EE00E7A6C0 /* Build configuration list for PBXNativeTarget "LPhoto" */;
@@ -102,10 +219,12 @@
 				3CCDC6E82DF867ED00E7A6C0 /* Sources */,
 				3CCDC6E92DF867ED00E7A6C0 /* Frameworks */,
 				3CCDC6EA2DF867ED00E7A6C0 /* Resources */,
+				3CB905272DF92D2A007D8813 /* Embed ExtensionKit Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				3CB905252DF92D2A007D8813 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				3CCDC6EE2DF867ED00E7A6C0 /* LPhoto */,
@@ -173,6 +292,9 @@
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					3CB9051C2DF92D2A007D8813 = {
+						CreatedOnToolsVersion = 16.4;
+					};
 					3CCDC6EB2DF867ED00E7A6C0 = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -203,11 +325,19 @@
 				3CCDC6EB2DF867ED00E7A6C0 /* LPhoto */,
 				3CCDC6F82DF867EE00E7A6C0 /* LPhotoTests */,
 				3CCDC7022DF867EE00E7A6C0 /* LPhotoUITests */,
+				3CB9051C2DF92D2A007D8813 /* LPhotoShortcuts */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3CB9051B2DF92D2A007D8813 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3CCDC6EA2DF867ED00E7A6C0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -232,10 +362,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3CB905192DF92D2A007D8813 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3CB7B7342DF92F6800FD39C6 /* VideoConverter.swift in Sources */,
+				3CB9052E2DF92DCB007D8813 /* APIKeyValidator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3CCDC6E82DF867ED00E7A6C0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C1495FF2DF9292E002342A7 /* APIKeyValidator.swift in Sources */,
+				3CBA140E2DF8B5E400A741B8 /* ImageConverter.swift in Sources */,
+				3C7DF1AC2DF8AAEE007FB10B /* ShortcutsProvider.swift in Sources */,
+				3CCDC71E2DF8754D00E7A6C0 /* VideoConverter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,6 +399,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		3CB905252DF92D2A007D8813 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3CB9051C2DF92D2A007D8813 /* LPhotoShortcuts */;
+			targetProxy = 3CB905242DF92D2A007D8813 /* PBXContainerItemProxy */;
+		};
 		3CCDC6FB2DF867EE00E7A6C0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3CCDC6EB2DF867ED00E7A6C0 /* LPhoto */;
@@ -269,6 +417,60 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		3CB905282DF92D2A007D8813 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KLT728FZUR;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LPhotoShortcuts/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LPhotoShortcuts;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sunfan.LPhoto.LPhotoShortcuts;
+				PRODUCT_NAME = LPhotoShortcuts;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3CB905292DF92D2A007D8813 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JL2HZJZA32;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LPhotoShortcuts/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LPhotoShortcuts;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sunfan.LPhoto.LPhotoShortcuts;
+				PRODUCT_NAME = LPhotoShortcuts;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		3CCDC70B2DF867EE00E7A6C0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -322,11 +524,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sunfan.LPhoto;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -368,7 +571,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = KLT728FZUR;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -380,10 +582,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sunfan.LPhoto;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
@@ -395,11 +598,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KLT728FZUR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LPhoto/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "需要访问您的照片库以便处理和保存图片及视频，包括 Live Photos (HEIC)。";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "需要访问您的照片库以便处理和保存图片及视频，包括 Live Photos (HEIC)。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -410,7 +619,6 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Time-Grocery-Store.LPhoto";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -423,11 +631,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = KLT728FZUR;
+				DEVELOPMENT_TEAM = JL2HZJZA32;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LPhoto/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "需要访问您的照片库以便处理和保存图片及视频，包括 Live Photos (HEIC)。";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "需要访问您的照片库以便处理和保存图片及视频，包括 Live Photos (HEIC)。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -438,7 +652,6 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Time-Grocery-Store.LPhoto";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -471,11 +684,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = KLT728FZUR;
+				DEVELOPMENT_TEAM = JL2HZJZA32;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Time-Grocery-Store.LPhotoTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -506,10 +718,9 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = KLT728FZUR;
+				DEVELOPMENT_TEAM = JL2HZJZA32;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Time-Grocery-Store.LPhotoUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -521,6 +732,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3CB9052A2DF92D2A007D8813 /* Build configuration list for PBXNativeTarget "LPhotoShortcuts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3CB905282DF92D2A007D8813 /* Debug */,
+				3CB905292DF92D2A007D8813 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		3CCDC6E72DF867ED00E7A6C0 /* Build configuration list for PBXProject "LPhoto" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
