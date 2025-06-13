@@ -607,8 +607,8 @@
 				INFOPLIST_FILE = LPhoto/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Request to get access to the photo album.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Request to get access to the photo album.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "LPhoto needs access to your photo library to convert your photos and videos to HEIF format, which helps save storage space and improve image quality. For example, when you select a photo, the app will convert it to HEIF format and save it back to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "LPhoto needs access to your photo library to convert your photos and videos to HEIF format, which helps save storage space and improve image quality. For example, when you select a photo, the app will convert it to HEIF format and save it back to your photo library.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -640,8 +640,8 @@
 				INFOPLIST_FILE = LPhoto/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Request to get access to the photo album.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Request to get access to the photo album.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "LPhoto needs access to your photo library to convert your photos and videos to HEIF format, which helps save storage space and improve image quality. For example, when you select a photo, the app will convert it to HEIF format and save it back to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "LPhoto needs access to your photo library to convert your photos and videos to HEIF format, which helps save storage space and improve image quality. For example, when you select a photo, the app will convert it to HEIF format and save it back to your photo library.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -28,7 +28,7 @@ struct ContentView: View {
                     .frame(width: 100, height: 100)
                     .padding(.bottom, 20)
                 
-                Text("A powerful Shortcuts companion app that extends functionality and provides secure encryption for sensitive data.")
+                Text("This app has no user-interface. It provides an effective action that converts short videos to Live Photos.")
                     .foregroundColor(.white)
                     .font(.system(size: 20, weight: .light))
                     .multilineTextAlignment(.center)

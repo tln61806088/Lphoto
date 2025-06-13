@@ -171,12 +171,15 @@ class APIKeyValidator {
         // Check persistent cache
         if let cachedTimeData = defaults.object(forKey: networkTimeCacheKey) as? Data,
            let lastUpdateData = defaults.object(forKey: networkTimeCacheTimeKey) as? Date,
-           currentTime.timeIntervalSince(lastUpdateData) < cacheUpdateInterval,
-           let cachedNSDate = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSDate.self, from: cachedTimeData) as? Date {
-            // Update memory cache
-            cachedNetworkTime = cachedNSDate
-            lastNetworkTimeUpdate = lastUpdateData
-            return cachedNSDate
+           currentTime.timeIntervalSince(lastUpdateData) < cacheUpdateInterval {
+            
+            let allowedClasses = NSSet(array: [NSDate.self as AnyClass])
+            if let cachedNSDate = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses as! Set<AnyHashable>, from: cachedTimeData) as? Date {
+                // Update memory cache
+                cachedNetworkTime = cachedNSDate
+                lastNetworkTimeUpdate = lastUpdateData
+                return cachedNSDate
+            }
         }
         
         // Cache expired or doesn't exist, fetch network time again
@@ -210,17 +213,20 @@ class APIKeyValidator {
         // Check persistent cache
         if let cachedBindingData = defaults.object(forKey: "\(deviceBindingCacheKey)_\(key)") as? Data,
            let lastUpdateData = defaults.object(forKey: deviceBindingCacheTimeKey) as? Date,
-           currentTime.timeIntervalSince(lastUpdateData) < cacheUpdateInterval,
-           let cachedBindingDict = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSDictionary.self, from: cachedBindingData) as? [String: Any] {
-            // Update memory cache
-            let binding = (
-                idfv: cachedBindingDict["idfv"] as? String,
-                timestamp: cachedBindingDict["timestamp"] as? TimeInterval,
-                deviceIdentifier: cachedBindingDict["deviceIdentifier"] as? String
-            )
-            cachedDeviceBinding[key] = binding
-            lastDeviceBindingUpdate = lastUpdateData
-            return binding
+           currentTime.timeIntervalSince(lastUpdateData) < cacheUpdateInterval {
+            
+            let allowedClasses = NSSet(array: [NSDictionary.self as AnyClass, NSString.self as AnyClass, NSNumber.self as AnyClass])
+            if let cachedBindingDict = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses as! Set<AnyHashable>, from: cachedBindingData) as? [String: Any] {
+                // Update memory cache
+                let binding = (
+                    idfv: cachedBindingDict["idfv"] as? String,
+                    timestamp: cachedBindingDict["timestamp"] as? TimeInterval,
+                    deviceIdentifier: cachedBindingDict["deviceIdentifier"] as? String
+                )
+                cachedDeviceBinding[key] = binding
+                lastDeviceBindingUpdate = lastUpdateData
+                return binding
+            }
         }
         
         // Cache expired or doesn't exist, get from UserDefaults

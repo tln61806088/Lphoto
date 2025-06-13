@@ -16,7 +16,7 @@ class VideoConverter {
     func convertVideoToHEIF(from videoURL: URL) async throws -> (photoData: Data, videoURL: URL) {
         print("VideoConverter: convertVideoToHEIF(from:) called with URL: \(videoURL.absoluteString)")
 
-        let asset = AVAsset(url: videoURL)
+        let asset = AVURLAsset(url: videoURL)
         
         // 检查资源是否可导出
         let isExportable = try await asset.load(.isExportable)
@@ -308,7 +308,7 @@ class VideoConverter {
     private func generateStillImage(from videoURL: URL, at time: CMTime, size: CGSize, contentIdentifier: String) async throws -> Data? {
         print("VideoConverter: generateStillImage(from:at:size:contentIdentifier:) called for video: \(videoURL.absoluteString) with size: \(size), contentIdentifier: \(contentIdentifier)")
         
-        let asset = AVAsset(url: videoURL)
+        let asset = AVURLAsset(url: videoURL)
         let generator = AVAssetImageGenerator(asset: asset)
         
         // 配置图片生成器
