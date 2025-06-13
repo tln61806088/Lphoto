@@ -80,8 +80,8 @@ struct ConvertToHEIFIntent: AppIntent {
         
         // === Check video duration with retry for timing issues ===
         var loadedAsset: AVAsset? = nil
-        let maxRetries = 3
-        let retryDelay: UInt64 = 500_000_000 // 0.5 seconds in nanoseconds
+        let maxRetries = 11
+        let retryDelay: UInt64 = 1_000_000_000
         
         for i in 0..<maxRetries {
             do {
