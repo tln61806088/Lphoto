@@ -7,7 +7,7 @@ class AppState: ObservableObject {
     @Published var errorMessage = ""
     
     func createNewProject() {
-        // 重置所有状态
+        // Reset all states
         showSuccess = false
         successMessage = ""
         showError = false
@@ -17,6 +17,6 @@ class AppState: ObservableObject {
 
 struct Project {
     var id = UUID()
-    var name: String = "新项目"
+    var name: String = "New Project"
     var createdAt = Date()
 } 

@@ -2,7 +2,7 @@
 //  LPhotoApp.swift
 //  LPhoto
 //
-//  Created by 孙凡 on 2025/6/10.
+//  Created by Sun Fan on 2025/6/10.
 //
 
 import SwiftUI
@@ -10,7 +10,7 @@ import AppIntents
 import AVFoundation
 import Photos
 
-// 定义快捷指令类型
+// Define shortcut types
 enum Shortcut {
     case convertVideo(URL)
     case convertImage(URL)
@@ -34,7 +34,7 @@ struct LPhotoApp: App {
         }
         .commands {
             CommandGroup(replacing: .newItem) {
-                Button("新建项目") {
+                Button("New Project") {
                     appState.createNewProject()
                 }
                 .keyboardShortcut("n", modifiers: .command)
@@ -46,8 +46,8 @@ struct LPhotoApp: App {
 class AppDelegate: NSObject, UIApplicationDelegate {
     var appState: AppState!
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.OpenURLOptionsKey: Any]? = nil) -> Bool {
-        // 请求照片库权限
+    private func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.OpenURLOptionsKey: Any]? = nil) -> Bool {
+        // Request photo library permission
         PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
             switch status {
             case .authorized, .limited:
@@ -69,7 +69,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 try await handleIncomingURL(url)
             } catch {
                 appState.showError = true
-                appState.errorMessage = "处理失败: \(error.localizedDescription)"
+                appState.errorMessage = "Processing failed: \(error.localizedDescription)"
             }
         }
         return true
@@ -80,24 +80,24 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             do {
                 switch shortcut {
                 case .convertVideo(let videoURL):
-                    print("开始处理视频转换: \(videoURL)")
+                    print("Starting video conversion: \(videoURL)")
                     let (photoData, videoURL) = try await VideoConverter.shared.convertVideoToHEIF(from: videoURL)
                     try await VideoConverter.shared.saveLivePhoto(photoData: photoData, videoURL: videoURL)
-                    print("视频转换完成: \(videoURL.lastPathComponent)")
+                    print("Video conversion completed: \(videoURL.lastPathComponent)")
                     appState.showSuccess = true
-                    appState.successMessage = "视频转换成功"
+                    appState.successMessage = "Video conversion successful"
                 case .convertImage(let imageURL):
-                    print("开始处理图片转换: \(imageURL)")
+                    print("Starting image conversion: \(imageURL)")
                     let result = try await ImageConverter.shared.convertImageToHEIF(from: imageURL)
                     try await ImageConverter.shared.saveToPhotos(url: result)
-                    print("图片转换完成: \(result)")
+                    print("Image conversion completed: \(result)")
                     appState.showSuccess = true
-                    appState.successMessage = "图片转换成功"
+                    appState.successMessage = "Image conversion successful"
                 }
             } catch {
-                print("处理快捷指令时出错: \(error)")
+                print("Error processing shortcut: \(error)")
                 appState.showError = true
-                appState.errorMessage = "处理失败: \(error.localizedDescription)"
+                appState.errorMessage = "Processing failed: \(error.localizedDescription)"
             }
         }
     }
@@ -109,50 +109,50 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             let (photoData, videoURL) = try await VideoConverter.shared.convertVideoToHEIF(from: url)
             try await VideoConverter.shared.saveLivePhoto(photoData: photoData, videoURL: videoURL)
             appState.showSuccess = true
-            appState.successMessage = "视频转换成功"
+            appState.successMessage = "Video conversion successful"
         } else if ["jpg", "jpeg", "png", "gif"].contains(url.pathExtension.lowercased()) {
             let convertedURL: URL = try await ImageConverter.shared.convertImageToHEIF(from: url)
             try await ImageConverter.shared.saveToPhotos(url: convertedURL)
             appState.showSuccess = true
-            appState.successMessage = "图片转换成功"
+            appState.successMessage = "Image conversion successful"
         } else if url.scheme?.lowercased() == "http" || url.scheme?.lowercased() == "https" {
-            // 尝试下载网页内容并提取视频URL
+            // Try to download webpage content and extract video URL
             let (data, response) = try await URLSession.shared.data(from: url)
             
             guard let httpResponse = response as? HTTPURLResponse,
                   httpResponse.statusCode == 200 else {
                 appState.showError = true
-                appState.errorMessage = "无法访问网页"
-                throw NSError(domain: "LPhoto", code: -1, userInfo: [NSLocalizedDescriptionKey: "无法访问网页"])
+                appState.errorMessage = "Unable to access webpage"
+                throw NSError(domain: "LPhoto", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to access webpage"])
             }
             
             if let htmlString = String(data: data, encoding: .utf8), let videoURLString = VideoConverter.shared.extractVideoURL(from: htmlString), let videoURL = URL(string: videoURLString) {
-                // 找到视频URL，尝试转换
+                // Found video URL, try to convert
                 let (photoData, videoURL) = try await VideoConverter.shared.convertVideoToHEIF(from: videoURL)
                 try await VideoConverter.shared.saveLivePhoto(photoData: photoData, videoURL: videoURL)
                 appState.showSuccess = true
-                appState.successMessage = "视频转换成功"
+                appState.successMessage = "Video conversion successful"
             } else if let mimeType = httpResponse.mimeType?.lowercased(), mimeType.contains("video") {
-                // 直接是视频文件，尝试转换
+                // Direct video file, try to convert
                 let (photoData, videoURL) = try await VideoConverter.shared.convertVideoToHEIF(from: url)
                 try await VideoConverter.shared.saveLivePhoto(photoData: photoData, videoURL: videoURL)
                 appState.showSuccess = true
-                appState.successMessage = "视频转换成功"
+                appState.successMessage = "Video conversion successful"
             } else {
                 appState.showError = true
-                appState.errorMessage = "不支持的网页内容类型或未找到视频"
-                throw NSError(domain: "LPhoto", code: -1, userInfo: [NSLocalizedDescriptionKey: "不支持的网页内容类型或未找到视频"])
+                appState.errorMessage = "Unsupported webpage content type or video not found"
+                throw NSError(domain: "LPhoto", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unsupported webpage content type or video not found"])
             }
         } else {
             appState.showError = true
-            appState.errorMessage = "无法处理的URL类型"
-            throw NSError(domain: "LPhoto", code: -1, userInfo: [NSLocalizedDescriptionKey: "无法处理的URL类型"])
+            appState.errorMessage = "Unable to process URL type"
+            throw NSError(domain: "LPhoto", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to process URL type"])
         }
     }
 }
 
 extension URLSession {
-    // 移除了同步方法，因为现在允许await了，优先使用原生async方法
+    // Removed synchronous method, because async/await is now allowed, prefer using native async methods
     // func synchronousDataTask(with request: URLRequest) throws -> (Data, URLResponse) { ... }
 }
 

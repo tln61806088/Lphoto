@@ -1,55 +1,55 @@
 import Foundation
 import Network
-import CryptoKit // 新增：用于SHA256哈希计算
-import Security // 新增：用于Keychain服务
+import CryptoKit // Added: For SHA256 hash calculation
+import Security // Added: For Keychain service
 import UIKit
 import CoreTelephony
 import SystemConfiguration
 
 class APIKeyValidator {
 
-    static let shared = APIKeyValidator() // 单例模式
+    static let shared = APIKeyValidator() // Singleton pattern
 
     private init() {}
 
-    // 这是您的秘密短语，务必保密！
-    // 实际应用中，您可以考虑更复杂的混淆或从安全配置中加载
-    private let secretPhrase = "YourVerySecretLongAndRandomPhraseHereForLPhotoApp!" // <<--- 【重要】请替换成您自己的长且随机的字符串
+    // This is your secret phrase, keep it confidential!
+    // In a real application, you might consider more complex obfuscation or loading from a secure configuration
+    private let secretPhrase = "YourVerySecretLongAndRandomPhraseHereForLPhotoApp!" // <<--- [IMPORTANT] Replace with your own long and random string
 
-    // Keychain 服务标识符
-    private let keychainService = "com.sunfan.LPhoto.apiKeyBinding" // 请替换成您自己的Bundle Identifier或独特的服务名
+    // Keychain service identifier
+    private let keychainService = "com.sunfan.LPhoto.apiKeyBinding" // Replace with your own Bundle Identifier or unique service name
     private let keychainAccount = "apiKeyBoundIDFV"
 
-    // UserDefaults 键前缀
+    // UserDefaults key prefixes
     private let defaultsKeyPrefix = "key_binding_"
     private let defaultsTimePrefix = "key_binding_time_"
     private let defaultsDevicePrefix = "key_binding_device_"
 
-    // 绑定时间有效期（24小时）
+    // Binding time validity period (24 hours)
     private let bindingTimeValidity: TimeInterval = 24 * 3600
 
-    // 缓存相关常量
-    private let cacheUpdateInterval: TimeInterval = 3600 // 1小时更新一次缓存
+    // Cache related constants
+    private let cacheUpdateInterval: TimeInterval = 3600 // Update cache every hour
     private let networkTimeCacheKey = "network_time_cache"
     private let networkTimeCacheTimeKey = "network_time_cache_time"
     private let deviceBindingCacheKey = "device_binding_cache"
     private let deviceBindingCacheTimeKey = "device_binding_cache_time"
 
-    // 缓存网络时间
+    // Cache network time
     private var cachedNetworkTime: Date?
     private var lastNetworkTimeUpdate: Date?
 
-    // 缓存设备绑定信息
+    // Cache device binding information
     private var cachedDeviceBinding: [String: (idfv: String?, timestamp: TimeInterval?, deviceIdentifier: String?)] = [:]
     private var lastDeviceBindingUpdate: Date?
 
-    // 定义有效期的代码和对应的日期组件
+    // Define expiry duration codes and corresponding date components
     enum ExpiryDuration: String, CaseIterable {
         case oneMonth = "M1"
         case sixMonths = "M6"
         case oneYear = "Y1"
         case twoYears = "Y2"
-        case permanent = "PERM" // 永久有效，特殊处理
+        case permanent = "PERM" // Permanent validity, special handling
 
         func dateComponents() -> DateComponents? {
             var components = DateComponents()
@@ -63,18 +63,18 @@ class APIKeyValidator {
             case .twoYears:
                 components.year = 2
             case .permanent:
-                return nil // 永久有效不需要日期组件
+                return nil // Permanent validity doesn't need date components
             }
             return components
         }
 
         var localizedDescription: String {
             switch self {
-            case .oneMonth: return "1个月"
-            case .sixMonths: return "6个月"
-            case .oneYear: return "1年"
-            case .twoYears: return "2年"
-            case .permanent: return "永久"
+            case .oneMonth: return "1 month"
+            case .sixMonths: return "6 months"
+            case .oneYear: return "1 year"
+            case .twoYears: return "2 years"
+            case .permanent: return "Permanent"
             }
         }
     }
@@ -92,50 +92,50 @@ class APIKeyValidator {
         var errorDescription: String? {
             switch self {
             case .invalidFormat:
-                return "API 密钥格式无效。请检查您的密钥格式是否为LPHOTO_KEY_YYYYMMDD_DURATIONCODE_YYYYMMDDHHMMSS_HASH。"
+                return "Invalid API key format. Please check if your key format is LPHOTO_KEY_YYYYMMDD_DURATIONCODE_YYYYMMDDHHMMSS_HASH."
             case .expired:
-                return "API 密钥已过期。请联系管理员获取新密钥。"
+                return "API key has expired. Please contact the administrator for a new key."
             case .networkTimeUnavailable:
-                return "无法获取网络时间以验证密钥。请检查您的网络连接或设备时间设置。LPhoto已过期。"
+                return "Unable to get network time to verify the key. Please check your network connection or device time settings. LPhoto has expired."
             case .hashMismatch:
-                return "API 密钥验证失败：哈希值不匹配。请确认密钥的完整性和正确性。"
+                return "API key verification failed: Hash mismatch. Please confirm the integrity and correctness of the key."
             case .unsupportedDuration:
-                return "API 密钥中包含不支持的有效期设置代码。请联系管理员。"
+                return "The API key contains an unsupported validity period code. Please contact the administrator."
             case .alreadyBoundToAnotherDevice:
-                return "此 API 密钥已绑定到另一台设备，无法在此设备上使用。"
+                return "This API key is already bound to another device and cannot be used on this device."
             case .deviceMismatch:
-                return "设备信息不匹配，请确保使用相同的设备。"
+                return "Device information mismatch, please ensure you are using the same device."
             case .bindingTimeExpired:
-                return "密钥绑定时间已过期，请重新验证。"
+                return "Key binding time has expired, please verify again."
             }
         }
     }
 
-    /// 获取设备标识信息（使用安全的 API）
+    /// Get device identifier information (using secure APIs)
     private func getDeviceIdentifier() -> String {
         var identifierComponents: [String] = []
         
-        // 设备型号（安全 API）
+        // Device model (secure API)
         let device = UIDevice.current
         identifierComponents.append(device.model)
         
-        // 系统版本（安全 API）
+        // System version (secure API)
         identifierComponents.append(device.systemVersion)
         
-        // 设备名称（安全 API）
+        // Device name (secure API)
         identifierComponents.append(device.name)
         
-        // 设备方向（安全 API）
+        // Device orientation (secure API)
         identifierComponents.append(String(device.orientation.rawValue))
         
-        // 计算标识符哈希
+        // Calculate identifier hash
         let identifierString = identifierComponents.joined(separator: "|")
         let identifierData = identifierString.data(using: .utf8)!
         let hash = SHA256.hash(data: identifierData)
         return hash.compactMap { String(format: "%02x", $0) }.joined()
     }
 
-    /// 保存绑定信息到 UserDefaults
+    /// Save binding information to UserDefaults
     private func saveToUserDefaults(key: String, idfv: String, deviceIdentifier: String) {
         let defaults = UserDefaults.standard
         let timestamp = Date().timeIntervalSince1970
@@ -145,7 +145,7 @@ class APIKeyValidator {
         defaults.set(deviceIdentifier, forKey: "\(defaultsDevicePrefix)\(key)")
     }
 
-    /// 从 UserDefaults 加载绑定信息
+    /// Load binding information from UserDefaults
     private func loadFromUserDefaults(key: String) -> (idfv: String?, timestamp: TimeInterval?, deviceIdentifier: String?) {
         let defaults = UserDefaults.standard
         
@@ -156,37 +156,37 @@ class APIKeyValidator {
         return (idfv, timestamp, deviceIdentifier)
     }
 
-    /// 获取缓存的网络时间，如果缓存过期则重新获取
+    /// Get cached network time, if cache expires then fetch again
     private func getCachedNetworkTime() async throws -> Date {
         let defaults = UserDefaults.standard
         let currentTime = Date()
         
-        // 检查内存缓存
+        // Check memory cache
         if let cachedTime = cachedNetworkTime,
            let lastUpdate = lastNetworkTimeUpdate,
            currentTime.timeIntervalSince(lastUpdate) < cacheUpdateInterval {
             return cachedTime
         }
         
-        // 检查持久化缓存
+        // Check persistent cache
         if let cachedTimeData = defaults.object(forKey: networkTimeCacheKey) as? Data,
            let lastUpdateData = defaults.object(forKey: networkTimeCacheTimeKey) as? Date,
            currentTime.timeIntervalSince(lastUpdateData) < cacheUpdateInterval,
            let cachedNSDate = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSDate.self, from: cachedTimeData) as? Date {
-            // 更新内存缓存
+            // Update memory cache
             cachedNetworkTime = cachedNSDate
             lastNetworkTimeUpdate = lastUpdateData
             return cachedNSDate
         }
         
-        // 缓存过期或不存在，重新获取网络时间
+        // Cache expired or doesn't exist, fetch network time again
         let networkTime = try await fetchNetworkTime()
         
-        // 更新内存缓存
+        // Update memory cache
         cachedNetworkTime = networkTime
         lastNetworkTimeUpdate = currentTime
         
-        // 更新持久化缓存
+        // Update persistent cache
         if let cachedTimeData = try? NSKeyedArchiver.archivedData(withRootObject: networkTime as NSDate, requiringSecureCoding: true) {
             defaults.set(cachedTimeData, forKey: networkTimeCacheKey)
             defaults.set(currentTime, forKey: networkTimeCacheTimeKey)
@@ -195,24 +195,24 @@ class APIKeyValidator {
         return networkTime
     }
 
-    /// 获取缓存的设备绑定信息，如果缓存过期则重新获取
+    /// Get cached device binding information, if cache expires then fetch again
     private func getCachedDeviceBinding(for key: String) -> (idfv: String?, timestamp: TimeInterval?, deviceIdentifier: String?) {
         let defaults = UserDefaults.standard
         let currentTime = Date()
         
-        // 检查内存缓存
+        // Check memory cache
         if let cachedBinding = cachedDeviceBinding[key],
            let lastUpdate = lastDeviceBindingUpdate,
            currentTime.timeIntervalSince(lastUpdate) < cacheUpdateInterval {
             return cachedBinding
         }
         
-        // 检查持久化缓存
+        // Check persistent cache
         if let cachedBindingData = defaults.object(forKey: "\(deviceBindingCacheKey)_\(key)") as? Data,
            let lastUpdateData = defaults.object(forKey: deviceBindingCacheTimeKey) as? Date,
            currentTime.timeIntervalSince(lastUpdateData) < cacheUpdateInterval,
            let cachedBindingDict = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSDictionary.self, from: cachedBindingData) as? [String: Any] {
-            // 更新内存缓存
+            // Update memory cache
             let binding = (
                 idfv: cachedBindingDict["idfv"] as? String,
                 timestamp: cachedBindingDict["timestamp"] as? TimeInterval,
@@ -223,14 +223,14 @@ class APIKeyValidator {
             return binding
         }
         
-        // 缓存过期或不存在，从 UserDefaults 获取
+        // Cache expired or doesn't exist, get from UserDefaults
         let binding = loadFromUserDefaults(key: key)
         
-        // 更新内存缓存
+        // Update memory cache
         cachedDeviceBinding[key] = binding
         lastDeviceBindingUpdate = currentTime
         
-        // 更新持久化缓存
+        // Update persistent cache
         let bindingDict: [String: Any] = [
             "idfv": binding.idfv as Any,
             "timestamp": binding.timestamp as Any,
@@ -244,18 +244,18 @@ class APIKeyValidator {
         return binding
     }
 
-    /// 验证 API 密钥的有效性。
-    /// 密钥格式应为 "LPHOTO_KEY_YYYYMMDD_DURATIONCODE_YYYYMMDDHHMMSS_HASH"，其中 YYYYMMDD 是过期日期，DURATIONCODE 是有效期代码，YYYYMMDDHHMMSS 是生成时间，HASH 是 (YYYYMMDD + DURATIONCODE + YYYYMMDDHHMMSS + 秘密短语) 的 SHA256 哈希值。
-    /// currentIDFV: 当前设备的 IDFV。
+    /// Validate the API key.
+    /// Key format should be "LPHOTO_KEY_YYYYMMDD_DURATIONCODE_YYYYMMDDHHMMSS_HASH", where YYYYMMDD is the expiry date, DURATIONCODE is the validity period code, YYYYMMDDHHMMSS is the generation time, and HASH is the SHA256 hash of (YYYYMMDD + DURATIONCODE + YYYYMMDDHHMMSS + secret phrase).
+    /// currentIDFV: The current device's IDFV.
     func validateKey(_ key: String?, currentIDFV: String) async throws {
         guard let key = key, !key.isEmpty else {
             throw APIKeyError.invalidFormat
         }
 
-        // 获取当前设备标识
+        // Get current device identifier
         let currentDeviceIdentifier = getDeviceIdentifier()
 
-        // 使用缓存的设备绑定信息
+        // Use cached device binding information
         let binding = getCachedDeviceBinding(for: key)
         
         if let boundIDFV = binding.idfv {
@@ -266,23 +266,23 @@ class APIKeyValidator {
             
             if let bindingTime = binding.timestamp,
                let storedDeviceIdentifier = binding.deviceIdentifier {
-                // 检查绑定时间是否在有效期内
+                // Check if binding time is within validity period
                 let currentTime = Date().timeIntervalSince1970
                 if currentTime - bindingTime > bindingTimeValidity {
                     print("APIKeyValidator: Binding time expired for key '\(key)'")
                     throw APIKeyError.bindingTimeExpired
                 }
                 
-                // 检查设备标识
+                // Check device identifier
                 if storedDeviceIdentifier != currentDeviceIdentifier {
                     print("APIKeyValidator: Device identifier mismatch for key '\(key)'")
                     throw APIKeyError.deviceMismatch
                 }
             }
         } else {
-            // 如果都没有绑定，则进行新的绑定
+            // If not bound, perform new binding
             if saveBoundIDFV(key: key, idfv: currentIDFV) {
-                // 同时保存到 UserDefaults 和缓存
+                // Save to both UserDefaults and cache
                 saveToUserDefaults(key: key, idfv: currentIDFV, deviceIdentifier: currentDeviceIdentifier)
                 let binding = (idfv: currentIDFV, timestamp: Date().timeIntervalSince1970, deviceIdentifier: currentDeviceIdentifier)
                 cachedDeviceBinding[key] = binding
@@ -292,7 +292,7 @@ class APIKeyValidator {
         }
 
         let components = key.split(separator: "_")
-        // 现在期望6个部分: LPHOTO, KEY, YYYYMMDD, DURATIONCODE, YYYYMMDDHHMMSS, HASH
+        // Now expecting 6 parts: LPHOTO, KEY, YYYYMMDD, DURATIONCODE, YYYYMMDDHHMMSS, HASH
         guard components.count == 6,
               components[0] == "LPHOTO",
               components[1] == "KEY",
@@ -304,10 +304,10 @@ class APIKeyValidator {
 
         let expiryDateString = String(components[2])
         let durationCodeString = String(components[3])
-        let timestampString = String(components[4]) // 新增：时间戳字符串
+        let timestampString = String(components[4]) // Added: Timestamp string
         let providedHash = String(components[5]) // HASH part
 
-        // 验证哈希值：现在哈希是基于 expiryDateString + durationCodeString + timestampString + secretPhrase 的组合
+        // Verify hash: Now hash is based on expiryDateString + durationCodeString + timestampString + secretPhrase combination
         let hashSourceString = expiryDateString + durationCodeString + timestampString + secretPhrase
         let expectedHash = SHA256.hash(data: hashSourceString.data(using: .utf8)!).compactMap { String(format: "%02x", $0) }.joined()
         
@@ -316,47 +316,47 @@ class APIKeyValidator {
             throw APIKeyError.hashMismatch
         }
 
-        // 解析过期日期
+        // Parse expiry date
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
-        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0) // 使用 GMT 时间以避免时区问题
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0) // Use GMT time to avoid timezone issues
         guard let expiryDate = dateFormatter.date(from: expiryDateString) else {
-            throw APIKeyError.invalidFormat // 如果日期字符串本身无效
+            throw APIKeyError.invalidFormat // If the date string itself is invalid
         }
 
-        // 使用缓存的网络时间
+        // Use cached network time
         let currentTime = try await getCachedNetworkTime()
         
-        // 比较日期，并额外处理永久有效的情况
-        if durationCodeString == ExpiryDuration.permanent.rawValue { // 直接比较字符串
+        // Compare dates, and handle permanent validity case
+        if durationCodeString == ExpiryDuration.permanent.rawValue { // Direct string comparison
             print("APIKeyValidator: Key is permanent. Expiration: \(expiryDateString) (from key data). (Timestamp: \(timestampString))")
-            return // 永久有效，直接返回成功
+            return // Permanent validity, return success directly
         }
 
-        // 密钥是否过期判断（基于实际日期）
+        // Check if key is expired (based on actual date)
         if currentTime > expiryDate {
             print("APIKeyValidator: Key expired. Current time: \(currentTime), Key Expiry Date: \(expiryDate) (from key data). (Timestamp: \(timestampString))")
             throw APIKeyError.expired
         } else {
             print("APIKeyValidator: Key is valid. Current time: \(currentTime), Key Expiry Date: \(expiryDate) (from key data). Duration code: \(ExpiryDuration(rawValue: durationCodeString)?.localizedDescription ?? durationCodeString). (Timestamp: \(timestampString))")
-            // 可以选择在这里计算并打印剩余有效期，如果 expiryDate > currentTime
+            // Optionally calculate and print remaining validity period if expiryDate > currentTime
             let remainingComponents = Calendar.current.dateComponents([.year, .month, .day, .hour], from: currentTime, to: expiryDate)
-            var remainingString = "剩余有效期: "
-            if let years = remainingComponents.year, years > 0 { remainingString += "\(years)年" }
-            if let months = remainingComponents.month, months > 0 { remainingString += "\(months)个月" }
-            if let days = remainingComponents.day, days > 0 { remainingString += "\(days)天" }
-            if let hours = remainingComponents.hour, hours > 0 { remainingString += "\(hours)小时" }
-            if remainingString == "剩余有效期: " { remainingString += "不足1小时" }
+            var remainingString = "Remaining validity: "
+            if let years = remainingComponents.year, years > 0 { remainingString += "\(years) years" }
+            if let months = remainingComponents.month, months > 0 { remainingString += "\(months) months" }
+            if let days = remainingComponents.day, days > 0 { remainingString += "\(days) days" }
+            if let hours = remainingComponents.hour, hours > 0 { remainingString += "\(hours) hours" }
+            if remainingString == "Remaining validity: " { remainingString += "Less than 1 hour" }
             print(remainingString)
         }
     }
 
-    /// 从 Keychain 中加载指定密钥绑定的 IDFV。
+    /// Load the IDFV bound to the specified key from Keychain.
     private func loadBoundIDFV(for key: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: keychainService,
-            kSecAttrAccount as String: "\(keychainAccount)-\(key)", // 使用密钥作为账户的一部分，实现一键一绑定
+            kSecAttrAccount as String: "\(keychainAccount)-\(key)", // Use key as part of account, implement one-key-one-binding
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
@@ -367,17 +367,17 @@ class APIKeyValidator {
         if status == errSecSuccess, let data = item as? Data {
             return String(data: data, encoding: .utf8)
         } else if status == errSecItemNotFound {
-            return nil // 未找到绑定
+            return nil // Binding not found
         } else {
             print("APIKeyValidator: Keychain load error: \(status)")
             return nil
         }
     }
 
-    /// 将密钥与 IDFV 绑定并保存到 Keychain 中。
+    /// Bind the key with IDFV and save to Keychain.
     @discardableResult
     private func saveBoundIDFV(key: String, idfv: String) -> Bool {
-        // 先尝试删除旧的绑定，确保只保留最新的
+        // First try to delete old binding to ensure only the latest is kept
         deleteBoundIDFV(for: key)
 
         guard let idfvData = idfv.data(using: .utf8) else { return false }
@@ -387,7 +387,7 @@ class APIKeyValidator {
             kSecAttrService as String: keychainService,
             kSecAttrAccount as String: "\(keychainAccount)-\(key)",
             kSecValueData as String: idfvData,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock // 解锁后即可访问
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock // Accessible after first unlock
         ]
 
         let status = SecItemAdd(query as CFDictionary, nil)
@@ -398,7 +398,7 @@ class APIKeyValidator {
         return true
     }
 
-    /// 从 Keychain 中删除指定密钥的绑定。
+    /// Delete the binding for the specified key from Keychain.
     @discardableResult
     private func deleteBoundIDFV(for key: String) -> Bool {
         let query: [String: Any] = [
@@ -415,18 +415,18 @@ class APIKeyValidator {
         return true
     }
 
-    /// 从网络获取当前时间。
+    /// Fetch current time from network.
     private func fetchNetworkTime() async throws -> Date {
-        // 国内可用的时间服务器列表
+        // List of time servers available in China
         let timeServers = [
             "https://www.baidu.com",
             "https://www.aliyun.com",
             "https://www.qq.com",
         ]
         
-        // 配置请求超时
+        // Configure request timeout
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 5.0  // 5秒超时
+        configuration.timeoutIntervalForRequest = 5.0  // 5 second timeout
         let session = URLSession(configuration: configuration)
         
         for server in timeServers {
@@ -451,19 +451,19 @@ class APIKeyValidator {
                 }
             } catch {
                 print("APIKeyValidator: Failed to fetch time from \(server): \(error.localizedDescription)")
-                continue // 尝试下一个服务器
+                continue // Try next server
             }
         }
         
-        // 如果所有服务器都失败，使用本地时间作为备用
+        // If all servers fail, use local time as fallback
         print("APIKeyValidator: All time servers failed, using local time as fallback")
         return Date()
     }
 
-    /// 用于生成 SHA256 哈希值的辅助函数 (现在基于 expiryDateString + durationCodeString + timestampString + secretPhrase)
+    /// Helper function for generating SHA256 hash (now based on expiryDateString + durationCodeString + timestampString + secretPhrase)
     func generateSHA256(for expiryDateString: String, durationCodeString: String, timestampString: String) -> String {
         let combinedString = expiryDateString + durationCodeString + timestampString + secretPhrase
-        let data = combinedString.data(using: .utf8)! // 确保字符串是有效的 UTF8
+        let data = combinedString.data(using: .utf8)! // Ensure string is valid UTF8
         let hash = SHA256.hash(data: data)
         return hash.compactMap { String(format: "%02x", $0) }.joined()
     }

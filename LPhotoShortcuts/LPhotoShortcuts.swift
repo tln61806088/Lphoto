@@ -2,7 +2,7 @@
 //  LPhotoShortcuts.swift
 //  LPhotoShortcuts
 //
-//  Created by 孙凡 on 2025/6/11.
+//  Created by Sun Fan on 2025/6/11.
 //
 
 import AppIntents

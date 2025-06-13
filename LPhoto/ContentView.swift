@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  LPhoto
 //
-//  Created by 孙凡 on 2025/6/10.
+//  Created by Sun Fan on 2025/6/10.
 //
 
 import SwiftUI
@@ -36,7 +36,7 @@ struct ContentView: View {
                 
                 Spacer()
                 
-                // 权限状态显示
+                // Permission status display
                 VStack(spacing: 10) {
                     HStack(alignment: .center) {
                         HStack(spacing: 4) {
@@ -87,34 +87,34 @@ struct ContentView: View {
     }
     
     private func checkPermissions() {
-        // 检查网络权限
+        // Check network permission
         let monitor = NWPathMonitor()
         monitor.pathUpdateHandler = { path in
             DispatchQueue.main.async {
                 if path.status == .satisfied {
-                    networkStatus = "●" // 绿色圆圈
+                    networkStatus = "●" // Green circle
                 } else {
-                    networkStatus = "●" // 红色圆圈
+                    networkStatus = "●" // Red circle
                 }
             }
         }
         let queue = DispatchQueue(label: "NetworkMonitor")
         monitor.start(queue: queue)
         
-        // 检查照片权限
+        // Check photo permission
         PHPhotoLibrary.requestAuthorization { status in
             DispatchQueue.main.async {
                 switch status {
                 case .authorized:
-                    photosStatus = "●" // 绿色圆圈
+                    photosStatus = "●" // Green circle
                 case .denied, .restricted:
-                    photosStatus = "●" // 红色圆圈
+                    photosStatus = "●" // Red circle
                 case .notDetermined:
-                    photosStatus = "●" // 红色圆圈
+                    photosStatus = "●" // Red circle
                 case .limited:
-                    photosStatus = "●" // 红色圆圈
+                    photosStatus = "●" // Red circle
                 @unknown default:
-                    photosStatus = "●" // 红色圆圈
+                    photosStatus = "●" // Red circle
                 }
             }
         }

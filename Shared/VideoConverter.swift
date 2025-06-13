@@ -79,7 +79,7 @@ class VideoConverter {
 
         // 音频输入
         let audioWriterInputOpt: AVAssetWriterInput?
-        if let audioTrack = audioTrack {
+        if audioTrack != nil {
             let audioOutputSettings: [String: Any] = [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
                 AVNumberOfChannelsKey: 2,

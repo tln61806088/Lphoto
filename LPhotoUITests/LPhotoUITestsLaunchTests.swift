@@ -2,7 +2,7 @@
 //  LPhotoUITestsLaunchTests.swift
 //  LPhotoUITests
 //
-//  Created by 孙凡 on 2025/6/10.
+//  Created by Sun Fan on 2025/6/10.
 //
 
 import XCTest

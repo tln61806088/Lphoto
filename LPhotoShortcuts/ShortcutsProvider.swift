@@ -19,7 +19,7 @@ struct ConvertToHEIFIntent: AppIntent {
 
         // === API Key Validation ===
         do {
-            guard let currentIDFV = UIDevice.current.identifierForVendor?.uuidString else {
+            guard let currentIDFV = await UIDevice.current.identifierForVendor?.uuidString else {
                 throw NSError(domain: "APIKeyValidation", code: -4, userInfo: [NSLocalizedDescriptionKey: "Unable to get device identifier (IDFV)."])
             }
             try await APIKeyValidator.shared.validateKey(apiKey, currentIDFV: currentIDFV)
