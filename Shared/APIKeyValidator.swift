@@ -132,7 +132,9 @@ class APIKeyValidator {
         let identifierString = identifierComponents.joined(separator: "|")
         let identifierData = identifierString.data(using: .utf8)!
         let hash = SHA256.hash(data: identifierData)
-        return hash.compactMap { String(format: "%02x", $0) }.joined()
+        let deviceHash = hash.compactMap { String(format: "%02x", $0) }.joined()
+        print("APIKeyValidator: Calculated Device Identifier Hash: \(deviceHash)")
+        return deviceHash
     }
 
     /// Save binding information to UserDefaults
@@ -254,17 +256,21 @@ class APIKeyValidator {
     /// Key format should be "LPHOTO_KEY_YYYYMMDD_DURATIONCODE_YYYYMMDDHHMMSS_HASH", where YYYYMMDD is the expiry date, DURATIONCODE is the validity period code, YYYYMMDDHHMMSS is the generation time, and HASH is the SHA256 hash of (YYYYMMDD + DURATIONCODE + YYYYMMDDHHMMSS + secret phrase).
     /// currentIDFV: The current device's IDFV.
     func validateKey(_ key: String?, currentIDFV: String) async throws {
+        print("APIKeyValidator: Starting validateKey for key: \(key ?? "nil")")
+        print("APIKeyValidator: Current IDFV: \(currentIDFV)")
         guard let key = key, !key.isEmpty else {
             throw APIKeyError.invalidFormat
         }
 
         // Get current device identifier
         let currentDeviceIdentifier = getDeviceIdentifier()
+        print("APIKeyValidator: Current Device Identifier Hash (from validateKey): \(currentDeviceIdentifier)")
 
         // Use cached device binding information
         let binding = getCachedDeviceBinding(for: key)
         
         if let boundIDFV = binding.idfv {
+            print("APIKeyValidator: Key '\(key)' is already bound. Stored IDFV: \(boundIDFV)")
             if boundIDFV != currentIDFV {
                 print("APIKeyValidator: Key '\(key)' is already bound to another device (IDFV: \(boundIDFV)). Current device IDFV: \(currentIDFV).")
                 throw APIKeyError.alreadyBoundToAnotherDevice
@@ -272,6 +278,7 @@ class APIKeyValidator {
             
             if let bindingTime = binding.timestamp,
                let storedDeviceIdentifier = binding.deviceIdentifier {
+                print("APIKeyValidator: Stored Binding Time: \(bindingTime), Stored Device Identifier: \(storedDeviceIdentifier)")
                 // Check if binding time is within validity period
                 let currentTime = Date().timeIntervalSince1970
                 if currentTime - bindingTime > bindingTimeValidity {
@@ -286,6 +293,7 @@ class APIKeyValidator {
                 }
             }
         } else {
+            print("APIKeyValidator: Key '\(key)' is not yet bound. Proceeding with new binding.")
             // If not bound, perform new binding
             if saveBoundIDFV(key: key, idfv: currentIDFV) {
                 // Save to both UserDefaults and cache

@@ -38,19 +38,44 @@ struct ConvertToHEIFIntent: AppIntent {
         }
         
         // === File Processing ===
-        guard let inputFile = inputFile, let fileURL = inputFile.fileURL else {
+        guard let inputFile = inputFile else {
             throw NSError(domain: "HEIFConversion", code: -1, userInfo: [NSLocalizedDescriptionKey: "No file selected or file unavailable."])
         }
-        
-        if !FileManager.default.fileExists(atPath: fileURL.path) {
-            print("ConvertToHEIFIntent Error: Local file does NOT exist at path: \(fileURL.path)")
-            throw NSError(domain: "HEIFConversion", code: -1, userInfo: [NSLocalizedDescriptionKey: "Local file does not exist: \(fileURL.path)"])
+
+        var tempVideoURL: URL!
+        var originalFileExtension: String! // To preserve original extension
+
+        do {
+            if let fileData = try? inputFile.data {
+                originalFileExtension = inputFile.fileURL?.pathExtension.lowercased() ?? "mp4" // Default to mp4 if no extension
+                let tempDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
+                let tempFileName = UUID().uuidString + "." + originalFileExtension
+                tempVideoURL = tempDirectory.appendingPathComponent(tempFileName)
+
+                try fileData.write(to: tempVideoURL)
+                print("ConvertToHEIFIntent: Successfully wrote input file data to temporary URL: \(tempVideoURL.path)")
+            } else if let fileURL = inputFile.fileURL {
+                // Fallback to fileURL if data is not directly available, but prefer data
+                originalFileExtension = fileURL.pathExtension.lowercased()
+                tempVideoURL = fileURL // Use the original fileURL
+                print("ConvertToHEIFIntent: Using original input file URL: \(fileURL.path)")
+            } else {
+                throw NSError(domain: "HEIFConversion", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not obtain file data or URL from input."])
+            }
+        } catch {
+            throw NSError(domain: "HEIFConversion", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to prepare input file: \(error.localizedDescription)"])
+        }
+
+        // Now use tempVideoURL for all subsequent file operations
+        if !FileManager.default.fileExists(atPath: tempVideoURL.path) {
+            print("ConvertToHEIFIntent Error: Local file does NOT exist at path: \(tempVideoURL.path)")
+            throw NSError(domain: "HEIFConversion", code: -1, userInfo: [NSLocalizedDescriptionKey: "Local file does not exist at path: \(tempVideoURL.path)"])
         }
         
         let supportedExtensions = ["mp4", "mov", "m4v", "webm"]
-        guard supportedExtensions.contains(fileURL.pathExtension.lowercased()) else {
-            print("ConvertToHEIFIntent Error: Unsupported local file type: \(fileURL.pathExtension)")
-            throw NSError(domain: "HEIFConversion", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unsupported local file type: \(fileURL.pathExtension)"])
+        guard supportedExtensions.contains(originalFileExtension) else {
+            print("ConvertToHEIFIntent Error: Unsupported local file type: \(originalFileExtension)")
+            throw NSError(domain: "HEIFConversion", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unsupported local file type: \(originalFileExtension)"])
         }
         
         // === Check video duration with retry for timing issues ===
@@ -60,7 +85,7 @@ struct ConvertToHEIFIntent: AppIntent {
         
         for i in 0..<maxRetries {
             do {
-                let currentAsset = AVURLAsset(url: fileURL) // Use AVURLAsset as recommended
+                let currentAsset = AVURLAsset(url: tempVideoURL) // Use AVURLAsset as recommended
                 _ = try await currentAsset.load(.tracks) // Attempt to load tracks to ensure it's a valid video asset and fully ready.
                 loadedAsset = currentAsset
                 print("ConvertToHEIFIntent: AVAsset loaded successfully on attempt \(i + 1).")
@@ -89,10 +114,20 @@ struct ConvertToHEIFIntent: AppIntent {
         }
         
         // === Convert video to HEIF ===
-        print("ConvertToHEIFIntent: Attempting to convert local video to HEIF: \(fileURL.lastPathComponent)")
-        let (photoData, videoURL) = try await VideoConverter.shared.convertVideoToHEIF(from: fileURL)
+        print("ConvertToHEIFIntent: Attempting to convert local video to HEIF: \(tempVideoURL.lastPathComponent)")
+        let (photoData, videoURL) = try await VideoConverter.shared.convertVideoToHEIF(from: tempVideoURL)
         try await VideoConverter.shared.saveLivePhoto(photoData: photoData, videoURL: videoURL)
-        print("ConvertToHEIFIntent: Local video converted to Live Photo successfully: \(fileURL.lastPathComponent)")
+        print("ConvertToHEIFIntent: Local video converted to Live Photo successfully: \(tempVideoURL.lastPathComponent)")
+        
+        // === Cleanup temporary file ===
+        if tempVideoURL.path.contains(NSTemporaryDirectory()) {
+            do {
+                try FileManager.default.removeItem(at: tempVideoURL)
+                print("ConvertToHEIFIntent: Successfully deleted temporary file: \(tempVideoURL.lastPathComponent)")
+            } catch {
+                print("ConvertToHEIFIntent Warning: Failed to delete temporary file: \(error.localizedDescription)")
+            }
+        }
         
         return .result()
     }
