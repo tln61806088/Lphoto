@@ -247,9 +247,13 @@ class APIKeyValidator {
     func validateKey(_ key: String?, currentIDFV: String) async throws {
         print("APIKeyValidator: Starting validateKey for key: \(key ?? "nil")")
         print("APIKeyValidator: Current IDFV: \(currentIDFV)")
-        guard let key = key, !key.isEmpty else {
+        guard var key = key, !key.isEmpty else {
             throw APIKeyError.invalidFormat
         }
+
+        // Trim leading/trailing whitespaces and newlines to prevent format errors
+        key = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        print("APIKeyValidator: Trimmed key for validation: \(key)")
 
         // Get current device identifier
         let currentDeviceIdentifier = getDeviceIdentifier()
@@ -310,8 +314,19 @@ class APIKeyValidator {
         let timestampString = String(components[4]) // Added: Timestamp string
         let providedHash = String(components[5]) // HASH part
 
+        // --- DEBUG PRINTS START ---
+        print("APIKeyValidator: Key components extracted:")
+        print("APIKeyValidator:   Expiry Date String: \(expiryDateString)")
+        print("APIKeyValidator:   Duration Code String: \(durationCodeString)")
+        print("APIKeyValidator:   Timestamp String: \(timestampString)")
+        print("APIKeyValidator:   Provided Hash: \(providedHash)")
+        // --- DEBUG PRINTS END ---
+
         // Verify hash: Now hash is based on expiryDateString + durationCodeString + timestampString + secretPhrase combination
         let hashSourceString = expiryDateString + durationCodeString + timestampString + secretPhrase
+        // --- DEBUG PRINTS START ---
+        print("APIKeyValidator: Hash Source String (for expectedHash): \(hashSourceString)")
+        // --- DEBUG PRINTS END ---
         let expectedHash = SHA256.hash(data: hashSourceString.data(using: .utf8)!).compactMap { String(format: "%02x", $0) }.joined()
         
         guard expectedHash == providedHash else {
