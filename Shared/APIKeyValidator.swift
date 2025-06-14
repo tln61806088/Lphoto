@@ -113,28 +113,17 @@ class APIKeyValidator {
 
     /// Get device identifier information (using secure APIs)
     private func getDeviceIdentifier() -> String {
-        var identifierComponents: [String] = []
-        
-        // Device model (secure API)
-        let device = UIDevice.current
-        identifierComponents.append(device.model)
-        
-        // System version (secure API)
-        identifierComponents.append(device.systemVersion)
-        
-        // Device name (secure API)
-        identifierComponents.append(device.name)
-        
-        // Device orientation (secure API)
-        identifierComponents.append(String(device.orientation.rawValue))
-        
-        // Calculate identifier hash
-        let identifierString = identifierComponents.joined(separator: "|")
-        let identifierData = identifierString.data(using: .utf8)!
-        let hash = SHA256.hash(data: identifierData)
-        let deviceHash = hash.compactMap { String(format: "%02x", $0) }.joined()
-        print("APIKeyValidator: Calculated Device Identifier Hash: \(deviceHash)")
-        return deviceHash
+        // 只用 identifierForVendor 作为唯一标识
+        if let idfv = UIDevice.current.identifierForVendor?.uuidString {
+            return idfv
+        } else {
+            // 兜底方案：用 model + systemVersion
+            let device = UIDevice.current
+            let identifierString = device.model + "|" + device.systemVersion
+            let identifierData = identifierString.data(using: .utf8)!
+            let hash = SHA256.hash(data: identifierData)
+            return hash.compactMap { String(format: "%02x", $0) }.joined()
+        }
     }
 
     /// Save binding information to UserDefaults
