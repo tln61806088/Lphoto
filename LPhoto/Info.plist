@@ -16,10 +16,14 @@
 	<key>INIntentsSupported</key>
 	<array>
 		<string>ConvertVideoToHEIFIntent</string>
+		<string>AddTiledWatermarkIntent</string>
+		<string>AddCornerWatermarkIntent</string>
 	</array>
 	<key>INIntentsSupportedByApp</key>
 	<array>
 		<string>ConvertVideoToHEIFIntent</string>
+		<string>AddTiledWatermarkIntent</string>
+		<string>AddCornerWatermarkIntent</string>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
@@ -29,6 +33,8 @@
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>ConvertVideoToHEIFIntent</string>
+		<string>AddTiledWatermarkIntent</string>
+		<string>AddCornerWatermarkIntent</string>
 	</array>
 </dict>
 </plist>

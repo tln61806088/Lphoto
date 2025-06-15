@@ -18,22 +18,14 @@ struct ConvertToHEIFIntent: AppIntent {
         print("ConvertToHEIFIntent: perform() called")
 
         // === API Key Validation ===
-        do {
-            guard let currentIDFV = await UIDevice.current.identifierForVendor?.uuidString else {
-                throw NSError(domain: "APIKeyValidation", code: -4, userInfo: [NSLocalizedDescriptionKey: "Unable to get device identifier (IDFV)."])
-            }
-            try await APIKeyValidator.shared.validateKey(apiKey, currentIDFV: currentIDFV)
-        } catch let error as APIKeyValidator.APIKeyError {
-            // Throw localized error based on APIKeyError type
-            switch error {
-            case .alreadyBoundToAnotherDevice:
-                throw NSError(domain: "APIKeyValidation", code: -5, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
-            case .deviceMismatch:
-                throw NSError(domain: "APIKeyValidation", code: -6, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
-            case .bindingTimeExpired:
-                throw NSError(domain: "APIKeyValidation", code: -7, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
-            default:
-                throw NSError(domain: "APIKeyValidation", code: -2, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
+        if let apiKey = apiKey, !apiKey.isEmpty {
+            do {
+                guard let currentIDFV = await UIDevice.current.identifierForVendor?.uuidString else {
+                    throw NSError(domain: "APIKeyValidation", code: -4, userInfo: [NSLocalizedDescriptionKey: "Unable to get device identifier (IDFV)."])
+                }
+                try await APIKeyValidator.shared.validateKey(apiKey, currentIDFV: currentIDFV)
+            } catch {
+                throw NSError(domain: "APIKeyValidation", code: -2, userInfo: [NSLocalizedDescriptionKey: "API Key validation failed: \(error.localizedDescription)"])
             }
         }
         
@@ -179,11 +171,30 @@ struct ConvertToHEIFIntent: AppIntent {
 @available(iOS 16.0, *)
 struct LPhotoShortcutsProvider: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
-        AppShortcut(
-            intent: ConvertToHEIFIntent(),
-            phrases: ["Convert to HEIF with \(.applicationName)"],
-            shortTitle: "Convert to HEIF",
-            systemImageName: "photo.on.rectangle.angled"
-        )
+        return [
+            // 视频转HEIF快捷指令
+            AppShortcut(
+                intent: ConvertToHEIFIntent(),
+                phrases: ["Convert to HEIF with \(.applicationName)", "视频转Live Photo"],
+                shortTitle: "Convert to HEIF",
+                systemImageName: "photo.on.rectangle.angled"
+            ),
+            
+            // 45度平铺水印快捷指令
+            AppShortcut(
+                intent: AddTiledWatermarkIntent(),
+                phrases: ["添加45度平铺水印 with \(.applicationName)", "视频添加平铺水印", "视频添加防盗水印"],
+                shortTitle: "添加45度平铺水印",
+                systemImageName: "video.badge.checkmark"
+            ),
+            
+            // 右上角水印快捷指令
+            AppShortcut(
+                intent: AddCornerWatermarkIntent(),
+                phrases: ["添加右上角水印 with \(.applicationName)", "视频添加角落水印", "视频添加标识水印"],
+                shortTitle: "添加右上角水印",
+                systemImageName: "video.and.waveform"
+            )
+        ]
     }
 } 
