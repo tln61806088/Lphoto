@@ -247,6 +247,10 @@ class APIKeyValidator {
     func validateKey(_ key: String?, currentIDFV: String) async throws {
         print("APIKeyValidator: Starting validateKey for key: \(key ?? "nil")")
         print("APIKeyValidator: Current IDFV: \(currentIDFV)")
+        
+        // Test key bypass removed for security reasons
+        // No special keys allowed
+        
         guard var key = key, !key.isEmpty else {
             throw APIKeyError.invalidFormat
         }

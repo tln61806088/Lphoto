@@ -118,21 +118,55 @@ struct ConvertToHEIFIntent: AppIntent {
                 
                 // If we don't have data yet, try standard URL approach
                 if dataToProcess == nil {
-                    let (data, response) = try await URLSession.shared.data(from: fileURL)
-                    if let httpResponse = response as? HTTPURLResponse, !(200..<300).contains(httpResponse.statusCode) {
-                        throw NSError(domain: "HEIFConversion", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to download video from URL: HTTP status \(httpResponse.statusCode)"])
+                    // 添加对安全作用域资源的处理
+                    if fileURL.isFileURL {
+                        print("ConvertToHEIFIntent: URL is a file URL, attempting direct access")
+                        do {
+                            // 尝试访问安全作用域资源（如果可用）
+                            var didStartAccessing = false
+                            if fileURL.startAccessingSecurityScopedResource() {
+                                didStartAccessing = true
+                                print("ConvertToHEIFIntent: Successfully started accessing security scoped resource")
+                            }
+                            
+                            // 确保在完成后停止访问
+                            defer {
+                                if didStartAccessing {
+                                    fileURL.stopAccessingSecurityScopedResource()
+                                    print("ConvertToHEIFIntent: Stopped accessing security scoped resource")
+                                }
+                            }
+                            
+                            // 尝试直接读取文件
+                            let data = try Data(contentsOf: fileURL)
+                            print("ConvertToHEIFIntent: Successfully read file directly with security scope, size: \(data.count) bytes")
+                            dataToProcess = data
+                        } catch {
+                            print("ConvertToHEIFIntent ERROR: Failed to read file with security scope: \(error.localizedDescription)")
+                            // 继续使用URL会话方法
+                        }
                     }
-                    dataToProcess = data
+                    
+                    // 如果仍然没有数据，尝试使用URL会话
+                    if dataToProcess == nil {
+                        let (data, response) = try await URLSession.shared.data(from: fileURL)
+                        if let httpResponse = response as? HTTPURLResponse, !(200..<300).contains(httpResponse.statusCode) {
+                            throw NSError(domain: "HEIFConversion", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to download video from URL: HTTP status \(httpResponse.statusCode)"])
+                        }
+                        dataToProcess = data
+                    }
                     
                     // For URLs, try to detect the actual content type rather than trusting the extension
-                    let detectedType = detectFileType(from: data)
-                    if let detectedType = detectedType {
-                        finalFileExtension = detectedType
-                        print("ConvertToHEIFIntent: URL content detected as: \(finalFileExtension ?? "unknown")")
-                    } else {
-                        // Fallback to URL extension if detection fails
-                        finalFileExtension = fileURL.pathExtension.lowercased().isEmpty ? "mp4" : fileURL.pathExtension.lowercased()
-                        print("ConvertToHEIFIntent: Could not detect file type, using URL extension: \(finalFileExtension ?? "mp4")")
+                    if let unwrappedData = dataToProcess {
+                        let detectedType = detectFileType(from: unwrappedData)
+                        if let detectedType = detectedType {
+                            finalFileExtension = detectedType
+                            print("ConvertToHEIFIntent: URL content detected as: \(finalFileExtension ?? "unknown")")
+                        } else {
+                            // Fallback to URL extension if detection fails
+                            finalFileExtension = fileURL.pathExtension.lowercased().isEmpty ? "mp4" : fileURL.pathExtension.lowercased()
+                            print("ConvertToHEIFIntent: Could not detect file type, using URL extension: \(finalFileExtension ?? "mp4")")
+                        }
                     }
                 }
                 
@@ -181,6 +215,11 @@ struct ConvertToHEIFIntent: AppIntent {
             print("ConvertToHEIFIntent: Successfully wrote processed data to temporary URL: \(tempVideoURL.path)")
 
         } catch {
+            print("ConvertToHEIFIntent ERROR: Failed to prepare input file with detailed error: \(error)")
+            // Print URL details if available
+            if let fileURL = inputFile.fileURL {
+                print("ConvertToHEIFIntent ERROR: File URL details - scheme: \(fileURL.scheme ?? "nil"), host: \(fileURL.host ?? "nil"), path: \(fileURL.path)")
+            }
             throw NSError(domain: "HEIFConversion", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to prepare input file: \(error.localizedDescription)"])
         }
 

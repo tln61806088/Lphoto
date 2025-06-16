@@ -34,8 +34,8 @@ class VideoConverter {
         
         // 获取音频轨道
         let audioTracks = try await asset.loadTracks(withMediaType: .audio)
-        let audioTrack = audioTracks.first
-
+        // 不再使用这个变量，直接在需要时使用audioTracks.first
+        
         let videoSize = try await videoTrack.load(.naturalSize)
         print("VideoConverter: Video natural size: \(videoSize)")
         
@@ -86,21 +86,48 @@ class VideoConverter {
 
         // 音频输入
         let audioWriterInputOpt: AVAssetWriterInput?
-        if audioTrack != nil {
-            // 不指定输出设置，而是使用源格式
+        let audioTrackForReaderOpt = audioTracks.first // 保存音轨引用，以便后续使用
+        
+        if audioTrackForReaderOpt != nil {
+            print("VideoConverter: Setting up audio track")
+            
+            // 对于Live Photo，使用源格式而不是指定输出格式
+            // 这样可以避免"Input buffer must be in an uncompressed format when outputSettings is not nil"错误
             let newAudioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: nil)
             newAudioWriterInput.expectsMediaDataInRealTime = false
-            assetWriter.add(newAudioWriterInput)
-            audioWriterInputOpt = newAudioWriterInput
+            
+            // 确保可以添加到写入器
+            if assetWriter.canAdd(newAudioWriterInput) {
+                assetWriter.add(newAudioWriterInput)
+                audioWriterInputOpt = newAudioWriterInput
+                print("VideoConverter: Added audio input to asset writer with source format (no conversion)")
+            } else {
+                print("VideoConverter Warning: Could not add audio input. Will continue without audio.")
+                audioWriterInputOpt = nil
+            }
         } else {
             audioWriterInputOpt = nil
+            print("VideoConverter: No audio track found in video")
         }
         
         // Live Photo 视频元数据
         let identifierMetadata = metadataItem(for: livePhotoUUID)
         let stillImageTimeAdaptor = stillImageTimeMetadataAdaptor()
         
-        assetWriter.metadata = [identifierMetadata] // 设置 Live Photo 内容标识符
+        // 添加更多Live Photo必要的元数据
+        var metadata: [AVMetadataItem] = [identifierMetadata]
+        
+        // 添加音频相关元数据
+        if let audioMetadata = createAudioMetadata() {
+            metadata.append(audioMetadata)
+        }
+        
+        // 添加"Made on iPhone"元数据（提高兼容性）
+        if let deviceMetadata = createDeviceMetadata() {
+            metadata.append(deviceMetadata)
+        }
+        
+        assetWriter.metadata = metadata // 设置 Live Photo 内容标识符和其他元数据
         assetWriter.add(stillImageTimeAdaptor.assetWriterInput)
 
         // 开始写入会话
@@ -116,15 +143,21 @@ class VideoConverter {
         videoReaderOutput.alwaysCopiesSampleData = false // 提高性能
         assetReader.add(videoReaderOutput)
 
-        // 音频使用原始格式读取
+        // 音频处理 - 直接使用源格式读取，避免转换问题
         let audioReaderOutputOpt: AVAssetReaderTrackOutput?
-        if let audioTrack = audioTrack {
+        if let audioTrack = audioTrackForReaderOpt {
+            // 为Live Photo优化：直接使用源格式读取音频，避免转换问题
             let newAudioReaderOutput = AVAssetReaderTrackOutput(track: audioTrack, outputSettings: nil)
-            newAudioReaderOutput.alwaysCopiesSampleData = false // 提高性能
+            // 设置为false以提高性能，避免不必要的内存复制
+            newAudioReaderOutput.alwaysCopiesSampleData = false
             assetReader.add(newAudioReaderOutput)
             audioReaderOutputOpt = newAudioReaderOutput
+            print("VideoConverter: Set up audio reader with source format for better compatibility")
+            
+            print("VideoConverter: Audio track found and configured for Live Photo compatibility")
         } else {
             audioReaderOutputOpt = nil
+            print("VideoConverter: No audio track found")
         }
         
         // 开始读取
@@ -167,22 +200,45 @@ class VideoConverter {
         }
 
         async let audioWritingFinished: Bool = withCheckedThrowingContinuation { continuation in
-            guard let unwrappedAudioWriterInput = audioWriterInputOpt, 
-                  let unwrappedAudioReaderOutput = audioReaderOutputOpt else {
+            guard let unwrappedAudioWriterInput = audioWriterInputOpt else {
                 continuation.resume(returning: true) // No audio track, so consider it finished
                 return
             }
+            
+            // 使用之前创建的音频读取输出
+            guard let unwrappedAudioReaderOutput = audioReaderOutputOpt else {
+                print("VideoConverter Warning: No audio reader output found. Will continue without audio.")
+                continuation.resume(returning: true)
+                return
+            }
+            
             unwrappedAudioWriterInput.requestMediaDataWhenReady(on: DispatchQueue(label: "audioWriterInputQueue")) {
+                var sampleCount = 0
                 while unwrappedAudioWriterInput.isReadyForMoreMediaData {
                     if let sampleBuffer = unwrappedAudioReaderOutput.copyNextSampleBuffer() {
-                        if !unwrappedAudioWriterInput.append(sampleBuffer) {
-                            print("VideoConverter Error: Failed to append audio sample buffer.")
-                            assetReader.cancelReading()
-                            continuation.resume(throwing: NSError(domain: "VideoConverter", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to write audio sample buffer"]))
-                            return
+                        let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+                        
+                        // 确保音频样本在导出时间范围内
+                        if exportTimeRange.containsTime(presentationTime) {
+                            // 打印音频样本信息（仅打印少量样本，避免日志过多）
+                            if sampleCount % 100 == 0 {
+                                let duration = CMSampleBufferGetDuration(sampleBuffer)
+                                print("VideoConverter: Processing audio sample at time \(presentationTime.seconds)s, duration: \(duration.seconds)s")
+                            }
+                            
+                            // 尝试写入音频样本
+                            if !unwrappedAudioWriterInput.append(sampleBuffer) {
+                                print("VideoConverter Error: Failed to append audio sample buffer.")
+                                print("VideoConverter Error: \(String(describing: assetWriter.error?.localizedDescription))")
+                                assetReader.cancelReading()
+                                continuation.resume(throwing: NSError(domain: "VideoConverter", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to write audio sample buffer"]))
+                                return
+                            }
+                            sampleCount += 1
                         }
                     } else {
                         unwrappedAudioWriterInput.markAsFinished()
+                        print("VideoConverter: Audio processing completed successfully with \(sampleCount) samples")
                         continuation.resume(returning: true)
                         return
                     }
@@ -264,6 +320,27 @@ class VideoConverter {
         item.keySpace = AVMetadataKeySpace.quickTimeMetadata
         item.value = 0 as NSCopying & NSObjectProtocol // 0 for the first frame as still image
         item.dataType = kCMMetadataBaseDataType_SInt8 as String
+        return item
+    }
+    
+    // 创建音频元数据，确保Live Photo中的音频被正确识别
+    private func createAudioMetadata() -> AVMutableMetadataItem? {
+        let item = AVMutableMetadataItem()
+        item.keySpace = AVMetadataKeySpace.quickTimeMetadata
+        item.key = "com.apple.quicktime.audio.enabled" as NSCopying & NSObjectProtocol
+        item.value = true as NSCopying & NSObjectProtocol
+        // 使用UTF8字符串类型，因为iOS不直接支持布尔类型元数据
+        item.dataType = kCMMetadataBaseDataType_UTF8 as String
+        return item
+    }
+    
+    // 创建设备元数据，增加兼容性
+    private func createDeviceMetadata() -> AVMutableMetadataItem? {
+        let item = AVMutableMetadataItem()
+        item.keySpace = AVMetadataKeySpace.quickTimeMetadata
+        item.key = "com.apple.quicktime.make" as NSCopying & NSObjectProtocol
+        item.value = "Apple" as NSCopying & NSObjectProtocol
+        item.dataType = kCMMetadataBaseDataType_UTF8 as String
         return item
     }
     
